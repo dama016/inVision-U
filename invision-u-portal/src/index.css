@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+  body {
+    @apply min-h-screen bg-brand-lime-soft text-slate-900 transition-theme duration-300 dark:bg-slate-950 dark:text-slate-100;
+  }
+}
+
+@layer utilities {
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+}

@@ -1,0 +1,74 @@
+// SQLite — run: npx prisma migrate dev && npx prisma db seed
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  APPLICANT
+  ADMIN
+}
+
+/// Application lifecycle (submitted package pending committee / AI).
+enum ApplicationStatus {
+  PENDING
+}
+
+enum CommitteeDecision {
+  NONE
+  ACCEPTED
+  REJECTED
+  RESERVE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  fullName     String   @default("")
+  phone        String   @default("")
+  iin          String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  candidate Candidate?
+}
+
+/// One application per applicant account (1:1 with User).
+model Candidate {
+  id                 String            @id @default(cuid())
+  userId             String            @unique
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationStatus  ApplicationStatus @default(PENDING)
+  essay              String?
+  resumeFileName     String?
+  appliedAt          DateTime          @default(now())
+  committeeDecision  CommitteeDecision @default(NONE)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  evaluation Evaluation?
+}
+
+model Evaluation {
+  id                String    @id @default(cuid())
+  candidateId       String    @unique
+  candidate         Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  totalScore        Int
+  leadershipScore   Int
+  professionalScore Int
+  socialScore       Int
+  personalScore     Int
+  analysis          String
+  antiCheatScore    Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
